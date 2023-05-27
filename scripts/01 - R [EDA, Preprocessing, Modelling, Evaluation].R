@@ -18,7 +18,8 @@ clean_train <- separate(train, col = Cabin,
 clean_train$Cabin_num <- as.numeric(clean_train$Cabin_num)
 clean_train$PassengerId = substr(clean_train$PassengerId, start = 1, stop = 4) #define whether passenger is alone or in a group
 clean_train$group<- ifelse(duplicated(clean_train$PassengerId) |
-                             duplicated(clean_train$PassengerId, fromLast = TRUE),
+                             duplicated(clean_train$PassengerId,
+                                        fromLast = TRUE),
                            "Multiple", "Unique")
 clean_train <- clean_train %>% select(-c(PassengerId, Name)) #remove redundant variables
 clean_train <- clean_train %>% mutate_all(~ifelse(. == "", NA, .)) #define empty entries as NA
@@ -65,3 +66,15 @@ clean_train %>%
                  tl.col = "black",
                  lower.col = "black",
                  number.cex = 1)
+
+
+# Pre-processing 2 --------------------------------------------------------
+train_rec <-recipe(Transported ~., data = clean_train) %>%
+  step_normalize(Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck) %>%
+  step_dummy(CryoSleep, Cabin_side, VIP, group, one_hot = TRUE) %>% 
+  step_dummy(HomePlanet, Cabin_deck, Destination, one_hot = FALSE)
+
+
+# Modelling ---------------------------------------------------------------
+
+# Model evaluation --------------------------------------------------------
