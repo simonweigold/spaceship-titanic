@@ -52,7 +52,7 @@ plot_data %>%
 # Visualise correlation between variables and quality
 clean_train %>%
   select(-c(HomePlanet, CryoSleep, Cabin_deck, Cabin_side, Destination, VIP,
-            group)) %>% 
+            Transported, group)) %>% 
   cor() %>% 
   corrplot.mixed(upper = "circle",
                  lower = "number",
@@ -63,12 +63,19 @@ clean_train %>%
 
 
 # Pre-processing 2 --------------------------------------------------------
-train_rec <-recipe(Transported ~., data = clean_train) %>%
+# get some validation on train data set by splitting "train" by 80/20 ratio
+set.seed(42)
+train_split <- clean_train %>% initial_split(prop = 0.80, strata = Transported)
+# Create DFs
+train_data <- training(train_split)
+test_data <- testing(train_split)
+# prepare for modelling
+train_rec <-recipe(Transported ~., data = train_data) %>%
   step_normalize(Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck) %>%
   step_dummy(CryoSleep, Cabin_side, VIP, group, one_hot = TRUE) %>% 
   step_dummy(HomePlanet, Cabin_deck, Destination, one_hot = FALSE)
 
-train_folds <- vfold_cv(data = clean_train, v = 5) #cross validation
+train_folds <- vfold_cv(data = train_data, v = 5) #cross validation
 
 
 # Specify model type and computational engine -----------------------------
@@ -118,10 +125,10 @@ final_wf <-
 
 
 # Fit and predict ---------------------------------------------------------
-final_gbt <- fit(final_wf, clean_train)
+final_gbt <- fit(final_wf, train_data)
 
-gbt_pred <- predict(final_gbt, new_data = clean_test)
+gbt_pred <- predict(final_gbt, new_data = test_data)
 
-predictions <- clean_test %>% 
+predictions <- test_data %>% 
   bind_cols(., gbt_pred)
 
