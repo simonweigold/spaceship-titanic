@@ -132,3 +132,9 @@ gbt_pred <- predict(final_gbt, new_data = test_data)
 predictions <- test_data %>% 
   bind_cols(., gbt_pred)
 
+
+# Check results -----------------------------------------------------------
+predictions$Transported <- as.factor(predictions$Transported)
+metrics(predictions, truth = Transported, estimate = .pred_class)
+conf_mat(predictions, truth = Transported, estimate = .pred_class)
+
