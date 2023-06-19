@@ -5,10 +5,9 @@ clean_data <- function(data) {
   # Separate Cabin column into three variables
   data <- separate(data, col = Cabin, into = c("Cabin_deck", "Cabin_num", "Cabin_side"), sep = "/")
   
-  # Categorize CryoSleep, VIP, and Transported variables as characters
+  # Categorize CryoSleep, and VIP variables as characters
   data$CryoSleep <- as.character(data$CryoSleep)
   data$VIP <- as.character(data$VIP)
-  data$Transported <- as.character(data$Transported)
   
   # Convert Cabin_num to numeric
   data$Cabin_num <- as.numeric(data$Cabin_num)
