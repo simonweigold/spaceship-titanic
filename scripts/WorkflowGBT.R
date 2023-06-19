@@ -63,14 +63,8 @@ conf_mat(predictions, truth = Transported, estimate = .pred_class)
 
 # Final application of model ----------------------------------------------
 final_pred <- predict(final_gbt, new_data = clean_test)
-
-clean_test$CryoSleep[clean_test$CryoSleep == "TRUE"] <- TRUE
-clean_test$CryoSleep[clean_test$CryoSleep == "FALSE"] <- FALSE
-clean_test$VIP[clean_test$VIP == "TRUE"] <- TRUE
-clean_test$VIP[clean_test$VIP == "FALSE"] <- FALSE
-clean_test <- inner_join(clean_test, test)
-
 final_predictions <- test %>% 
   select(PassengerId) %>% 
   bind_cols(., final_pred)
-
+colnames(final_predictions)[2] <- "Transported"
+write.csv(final_predictions, here::here("submission", "final_predictions.csv"))
