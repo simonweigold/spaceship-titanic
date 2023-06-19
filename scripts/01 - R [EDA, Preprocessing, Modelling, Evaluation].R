@@ -10,12 +10,6 @@ library(parallel)
 library(doParallel)
 
 
-# Start parallelisation ---------------------------------------------------
-cores <- parallel::detectCores(logical = FALSE)
-cl <- parallel::makePSOCKcluster(cores)
-doParallel::registerDoParallel(cl)
-
-
 # Data import -------------------------------------------------------------
 train <- rio::import(here::here("data", "train.csv"))
 test <- rio::import(here::here("data", "test.csv"))
@@ -27,6 +21,7 @@ source(here::here("scripts", "R data preprocessing function.R"))
 # Train data
 clean_train <- clean_data(train)
 clean_train$Transported <- as.character(clean_train$Transported) # Transported only exists in Train!
+#clean_train <- drop_na(clean_train) # Remove rows with NAs
 # Test data
 clean_test <- clean_data(test)
 
@@ -115,6 +110,11 @@ gbt_wflow <-
 
 
 # Analyse resamples
+# Start parallelisation
+#cores <- parallel::detectCores(logical = FALSE)
+#cl <- parallel::makePSOCKcluster(cores)
+#doParallel::registerDoParallel(cl)
+# Resamples
 system.time(
   gbt_res <- 
     gbt_wflow %>% 
@@ -122,7 +122,10 @@ system.time(
               #metrics = metric_set(huber_loss), #perhaps delete
               control = control_grid(verbose = T)) #print process in console
 )
-
+# End parallelisation
+#parallel::stopCluster(cl)
+#closeAllConnections()
+#showConnections()
 
 # Collect metrics
 collect_metrics(gbt_res)
@@ -215,7 +218,19 @@ metrics(predictions, truth = Transported, estimate = .pred_class)
 conf_mat(predictions, truth = Transported, estimate = .pred_class)
 
 
-# End parallelisation -----------------------------------------------------
-parallel::stopCluster(cl)
-closeAllConnections()
-showConnections()
+
+
+
+# Final application of model ----------------------------------------------
+final_pred <- predict(final_gbt, new_data = clean_test)
+
+clean_test$CryoSleep[clean_test$CryoSleep == "TRUE"] <- TRUE
+clean_test$CryoSleep[clean_test$CryoSleep == "FALSE"] <- FALSE
+clean_test$VIP[clean_test$VIP == "TRUE"] <- TRUE
+clean_test$VIP[clean_test$VIP == "FALSE"] <- FALSE
+clean_test <- inner_join(clean_test, test)
+
+final_predictions <- test %>% 
+  select(PassengerId) %>% 
+  bind_cols(., final_pred)
+
