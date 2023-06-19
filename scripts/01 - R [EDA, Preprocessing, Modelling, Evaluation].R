@@ -12,38 +12,12 @@ test <- rio::import(here::here("data", "test.csv"))
 
 
 # Pre-processing 1 --------------------------------------------------------
+# Load pre-processing function
+source(here::here("scripts", "R data preprocessing function.R"))
 # Train data
-clean_train <- separate(train, col = Cabin,
-                        into = c("Cabin_deck", "Cabin_num", "Cabin_side"),
-                        sep = "/") #categorise cabin position
-clean_train$CryoSleep <- as.character(clean_train$CryoSleep)
-clean_train$VIP <- as.character(clean_train$VIP)
-clean_train$Transported <- as.character(clean_train$Transported)
-clean_train$Cabin_num <- as.numeric(clean_train$Cabin_num)
-clean_train$PassengerId = substr(clean_train$PassengerId, start = 1, stop = 4) #define whether passenger is alone or in a group
-clean_train$group<- ifelse(duplicated(clean_train$PassengerId) |
-                             duplicated(clean_train$PassengerId,
-                                        fromLast = TRUE),
-                           "Multiple", "Unique")
-clean_train <- clean_train %>% select(-c(PassengerId, Name)) #remove redundant variables
-clean_train <- clean_train %>% mutate_all(~ifelse(. == "", NA, .)) #define empty entries as NA
-clean_train <- clean_train %>% drop_na() #remove NAs
-
+clean_train <- clean_data(train)
 # Test data
-clean_test <- separate(test, col = Cabin,
-                       into = c("Cabin_deck", "Cabin_num", "Cabin_side"),
-                       sep = "/") #categorise cabin position
-clean_test$CryoSleep <- as.character(clean_test$CryoSleep)
-clean_test$VIP <- as.character(clean_test$VIP)
-clean_test$Cabin_num <- as.numeric(clean_test$Cabin_num)
-clean_test$PassengerId = substr(clean_test$PassengerId, start = 1, stop = 4) #define whether passenger is alone or in a group
-clean_test$group<- ifelse(duplicated(clean_test$PassengerId) |
-                            duplicated(clean_test$PassengerId,
-                                       fromLast = TRUE),
-                          "Multiple", "Unique")
-clean_test <- clean_test %>% select(-c(PassengerId, Name)) #remove redundant variables
-clean_test <- clean_test %>% mutate_all(~ifelse(. == "", NA, .)) #define empty entries as NA
-clean_test <- clean_test %>% drop_na() #remove NAs
+clean_test <- clean_data(test)
 
 
 # Exploratory Data Analysis (EDA) -----------------------------------------
