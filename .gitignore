@@ -50,7 +50,7 @@ po/*~
 rsconnect/
 
 # data
-*.csv
+# *.csv
 
 # bin folder
 _alt/
