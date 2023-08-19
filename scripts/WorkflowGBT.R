@@ -67,4 +67,5 @@ final_predictions <- test %>%
   select(PassengerId) %>% 
   bind_cols(., final_pred)
 colnames(final_predictions)[2] <- "Transported"
-write.csv(final_predictions, here::here("submission", "final_predictions.csv"))
+write.csv(final_predictions, here::here("submission", "final_predictions.csv"),
+          row.names = FALSE)
