@@ -1,5 +1,5 @@
 # spaceship-titanic
-(Kaggle competition)[https://www.kaggle.com/competitions/spaceship-titanic] which tries to predict which passengers are transported to an alternate dimension
+[Kaggle competition](https://www.kaggle.com/competitions/spaceship-titanic) which tries to predict which passengers are transported to an alternate dimension
 
 ## Todos
 - [x] set up project infrastructure (GitHub repository + local machine)
